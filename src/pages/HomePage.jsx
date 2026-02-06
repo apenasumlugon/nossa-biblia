@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, Sparkles, ChevronRight } from 'lucide-react';
 import { getRandomVerse } from '../services/bibleService';
@@ -8,13 +8,7 @@ import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 export default function HomePage() {
     const { loading } = useBible();
-    const [dailyVerse, setDailyVerse] = useState(null);
-
-    useEffect(() => {
-        // Get random verse from local data
-        const verse = getRandomVerse();
-        setDailyVerse(verse);
-    }, []);
+    const [dailyVerse] = useState(() => getRandomVerse());
 
     if (loading) {
         return (

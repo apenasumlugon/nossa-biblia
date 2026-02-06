@@ -2,13 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Search, X, Book, Heart, Home, Menu, ChevronRight } from 'lucide-react';
 import { searchVerses } from '../../services/bibleService';
-import { useBible } from '../../context/BibleContext';
 import { useFavorites } from '../../context/FavoritesContext';
 
 export default function Header() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { getBookName } = useBible();
+
     const { favoritesCount } = useFavorites();
 
     const [searchQuery, setSearchQuery] = useState('');

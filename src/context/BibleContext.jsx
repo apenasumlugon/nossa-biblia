@@ -47,6 +47,7 @@ export function BibleProvider({ children }) {
     );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useBible() {
     const context = useContext(BibleContext);
     if (!context) {

@@ -16,7 +16,7 @@ export default function SkeletonLoader({ variant = 'text', count = 1, className 
                     className={`skeleton ${variants[variant]} ${variant === 'text' ? 'w-full' : ''}`}
                     style={{
                         animationDelay: `${i * 100}ms`,
-                        width: variant === 'text' ? `${Math.random() * 40 + 60}%` : undefined
+                        width: variant === 'text' ? `${(i * 37 + 60) % 40 + 60}%` : undefined
                     }}
                 />
             ))}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import {
     ChevronLeft,
@@ -14,6 +14,9 @@ import { getChapter } from '../../services/bibleService';
 import { useBible } from '../../context/BibleContext';
 import { useFavorites } from '../../context/FavoritesContext';
 import SkeletonLoader from '../ui/SkeletonLoader';
+import AiModal from '../ui/AiModal';
+import { isAiReady } from '../../services/aiService';
+import { Sparkles } from 'lucide-react';
 
 export default function ChapterReader() {
     const { abbrev, chapter } = useParams();
@@ -22,13 +25,13 @@ export default function ChapterReader() {
     const { getBookByAbbrev, getBookName } = useBible();
     const { isFavorite, toggleFavorite } = useFavorites();
 
-    const [chapterData, setChapterData] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [fontSize, setFontSize] = useState(() => {
         const saved = localStorage.getItem('bible-font-size');
         return saved ? parseInt(saved) : 18;
     });
     const [showSettings, setShowSettings] = useState(false);
+    const [selectedVerseForAi, setSelectedVerseForAi] = useState(null);
+    const [isAiModalOpen, setIsAiModalOpen] = useState(false);
 
     const contentRef = useRef(null);
     const highlightVerse = location.state?.highlightVerse;
@@ -36,17 +39,15 @@ export default function ChapterReader() {
     const chapterNum = parseInt(chapter);
     const book = getBookByAbbrev(abbrev);
 
-    // Fetch chapter data from local service
-    useEffect(() => {
-        setLoading(true);
-
-        // Small delay for smooth transition
-        setTimeout(() => {
-            const data = getChapter(abbrev, chapterNum);
-            setChapterData(data);
-            setLoading(false);
-        }, 100);
+    // Get chapter data using useMemo since it's a synchronous local operation
+    // This avoids the 'setState inside useEffect' warning and simplifies the code
+    const chapterData = useMemo(() => {
+        return getChapter(abbrev, chapterNum);
     }, [abbrev, chapterNum]);
+
+    // We don't really need a loading state for local data, but if we want to simulate
+    // a transition we can, but simpler is better.
+    const loading = false;
 
     // Scroll to highlighted verse
     useEffect(() => {
@@ -102,7 +103,7 @@ export default function ChapterReader() {
         if (navigator.share) {
             try {
                 await navigator.share({ title: text, url });
-            } catch (err) {
+            } catch {
                 // User cancelled or error
             }
         } else {
@@ -113,6 +114,15 @@ export default function ChapterReader() {
 
     const adjustFontSize = (delta) => {
         setFontSize((prev) => Math.min(28, Math.max(14, prev + delta)));
+    };
+
+    const handleAiExplain = (verse) => {
+        setSelectedVerseForAi({
+            ...verse,
+            bookName: getBookName(abbrev),
+            chapter: chapterNum
+        });
+        setIsAiModalOpen(true);
     };
 
     if (loading) {
@@ -232,20 +242,34 @@ export default function ChapterReader() {
                                 {verse.text}
                             </span>
 
-                            {/* Favorite Button */}
-                            <button
-                                onClick={() => handleToggleFavorite(verse)}
-                                className={`absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-full ${isFavorite(abbrev, chapterNum, verse.number)
-                                    ? 'text-[var(--color-primary)]'
-                                    : 'text-[var(--color-text-muted)] hover:text-[var(--color-primary)]'
-                                    }`}
-                                title={isFavorite(abbrev, chapterNum, verse.number) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-                            >
-                                <Heart
-                                    className="w-5 h-5"
-                                    fill={isFavorite(abbrev, chapterNum, verse.number) ? 'currentColor' : 'none'}
-                                />
-                            </button>
+                            {/* Actions container */}
+                            <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-[var(--color-surface)]/80 backdrop-blur-sm pl-2 pr-1 rounded-full py-1">
+                                {/* AI Button */}
+                                {isAiReady() && (
+                                    <button
+                                        onClick={() => handleAiExplain(verse)}
+                                        className="p-1.5 rounded-full text-[var(--color-text-muted)] hover:text-[#f5af19] transition-colors"
+                                        title="Reflexão IA para mim e meu amor"
+                                    >
+                                        <Sparkles className="w-5 h-5" />
+                                    </button>
+                                )}
+
+                                {/* Favorite Button */}
+                                <button
+                                    onClick={() => handleToggleFavorite(verse)}
+                                    className={`p-1.5 rounded-full transition-colors ${isFavorite(abbrev, chapterNum, verse.number)
+                                        ? 'text-[var(--color-primary)]'
+                                        : 'text-[var(--color-text-muted)] hover:text-[var(--color-primary)]'
+                                        }`}
+                                    title={isFavorite(abbrev, chapterNum, verse.number) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                                >
+                                    <Heart
+                                        className="w-5 h-5"
+                                        fill={isFavorite(abbrev, chapterNum, verse.number) ? 'currentColor' : 'none'}
+                                    />
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -275,6 +299,12 @@ export default function ChapterReader() {
                     <ChevronRight className="w-4 h-4" />
                 </button>
             </div>
+            {/* AI Modal */}
+            <AiModal
+                isOpen={isAiModalOpen}
+                onClose={() => setIsAiModalOpen(false)}
+                verse={selectedVerseForAi}
+            />
         </div>
     );
 }

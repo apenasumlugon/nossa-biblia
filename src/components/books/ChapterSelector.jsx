@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ChevronLeft, BookOpen } from 'lucide-react';
 import { useBible } from '../../context/BibleContext';
@@ -10,17 +10,15 @@ export default function ChapterSelector() {
     const navigate = useNavigate();
     const { getBookByAbbrev, loading, error } = useBible();
 
-    const [book, setBook] = useState(null);
+    // Derive book directly from context/params to avoid useEffect state updates
+    const book = getBookByAbbrev(abbrev);
 
     useEffect(() => {
-        const foundBook = getBookByAbbrev(abbrev);
-        if (foundBook) {
-            setBook(foundBook);
-        } else if (!loading && !error) {
+        if (!book && !loading && !error) {
             // Book not found, redirect to home
             navigate('/', { replace: true });
         }
-    }, [abbrev, getBookByAbbrev, loading, error, navigate]);
+    }, [book, loading, error, navigate]);
 
     if (loading) {
         return <LoadingSpinner text="Carregando..." />;

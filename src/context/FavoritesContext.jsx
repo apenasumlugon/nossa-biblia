@@ -2,7 +2,6 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import {
     isSupabaseConfigured,
     getCoupleCode,
-    saveCoupleCode,
     removeCoupleCode,
     generateCoupleCode,
     createCoupleCode,
@@ -274,6 +273,7 @@ export function FavoritesProvider({ children }) {
     );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useFavorites() {
     const context = useContext(FavoritesContext);
     if (!context) {
@@ -282,4 +282,4 @@ export function useFavorites() {
     return context;
 }
 
-export default FavoritesContext;
+
