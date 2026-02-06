@@ -285,6 +285,8 @@ export default function ChapterReader() {
                 isOpen={isMenuOpen}
                 onClose={() => setIsMenuOpen(false)}
                 verse={selectedVerse}
+                bookName={getBookName(abbrev)}
+                chapterNumber={chapterNum}
                 onHighlight={handleHighlight}
                 onFavorite={handleToggleFavorite}
                 isFavorite={selectedVerse && isFavorite(abbrev, chapterNum, selectedVerse.number)}

@@ -23,15 +23,15 @@
   --color-warning: #f59e0b;
   --color-error: #ef4444;
 
-  /* Highlight Colors */
-  --highlight-yellow: rgba(255, 223, 0, 0.25);
-  --highlight-green: rgba(0, 255, 127, 0.25);
-  --highlight-blue: rgba(0, 191, 255, 0.25);
-  --highlight-pink: rgba(255, 105, 180, 0.25);
+  /* Highlight Colors - Pastel/YouVersion Style */
+  --highlight-yellow: rgba(255, 235, 59, 0.35);
+  --highlight-green: rgba(76, 175, 80, 0.35);
+  --highlight-blue: rgba(33, 150, 243, 0.35);
+  --highlight-pink: rgba(233, 30, 99, 0.3);
 
   /* Fonts */
   --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-reading: 'Merriweather', Georgia, 'Times New Roman', serif;
+  --font-reading: 'Merriweather', 'Georgia', serif;
 
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -124,10 +124,10 @@ body {
 
 /* Glass Effect */
 .glass {
-  background: rgba(26, 26, 46, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(26, 26, 46, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .glass-light {
@@ -170,6 +170,18 @@ body {
   }
 }
 
+@keyframes slideInBottom {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes pulse-glow {
 
   0%,
@@ -200,16 +212,17 @@ body {
   animation: slideIn 0.3s ease-out forwards;
 }
 
+.animate-slide-in-bottom {
+  animation: slideInBottom 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
 /* Skeleton Loading */
 .skeleton {
-  background: linear-gradient(90deg,
-      var(--color-surface) 25%,
-      var(--color-surface-light) 50%,
-      var(--color-surface) 75%);
+  background: linear-gradient(90deg, var(--color-surface) 25%, var(--color-surface-light) 50%, var(--color-surface) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -318,38 +331,41 @@ body {
   color: var(--color-primary);
 }
 
-/* Verse Styles */
+/* Verse Styles - YouVersion Inspired */
 .verse-number {
   font-family: var(--font-ui);
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.65em;
+  /* Relative to font size */
+  font-weight: 700;
   color: var(--color-text-muted);
-  /* Softer number color like YouVersion */
   vertical-align: super;
-  margin-right: 0.25rem;
+  margin-right: 0.3em;
   user-select: none;
+  opacity: 0.7;
 }
 
 .verse-text {
   font-family: var(--font-reading);
   font-size: 1.125rem;
-  line-height: 2;
-  /* Increased for better readability */
+  line-height: 2.0;
+  /* Generous spacing */
   color: var(--color-text);
 }
 
-/* Verse Container Spacing */
+/* Interactive Verse Container */
 .verse-container {
   display: inline;
-  /* Keep verses flowing inline */
   cursor: pointer;
   border-radius: 4px;
   padding: 2px 0;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.15s ease-out;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 
 .verse-container:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  /* Only hover if not highlighted, or add slight tint */
 }
 
 /* Responsive Images */

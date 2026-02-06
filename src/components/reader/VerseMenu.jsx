@@ -2,7 +2,7 @@ import { useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Heart, Copy, Share2, X } from 'lucide-react';
 
-export default function VerseMenu({ isOpen, onClose, verse, onHighlight, onFavorite, isFavorite }) {
+export default function VerseMenu({ isOpen, onClose, verse, bookName, chapterNumber, onHighlight, onFavorite, isFavorite }) {
     const menuRef = useRef(null);
 
     useEffect(() => {
@@ -40,7 +40,7 @@ export default function VerseMenu({ isOpen, onClose, verse, onHighlight, onFavor
                 <div className="flex items-center justify-between mb-6">
                     <div>
                         <h3 className="text-lg font-bold text-[var(--color-text)]">
-                            {verse.book.name} {verse.chapter}:{verse.number}
+                            {bookName} {chapterNumber}:{verse.number}
                         </h3>
                         <p className="text-sm text-[var(--color-text-secondary)] mt-1 line-clamp-1">
                             Selecione uma ação
@@ -90,7 +90,7 @@ export default function VerseMenu({ isOpen, onClose, verse, onHighlight, onFavor
                     </button>
                     <button
                         onClick={() => {
-                            navigator.clipboard.writeText(`${verse.text} - ${verse.book.name} ${verse.chapter}:${verse.number}`);
+                            navigator.clipboard.writeText(`${verse.text} - ${bookName} ${chapterNumber}:${verse.number}`);
                             onClose();
                             alert('Versículo copiado!');
                         }}
@@ -104,7 +104,7 @@ export default function VerseMenu({ isOpen, onClose, verse, onHighlight, onFavor
                             if (navigator.share) {
                                 navigator.share({
                                     title: 'Versículo Bíblico',
-                                    text: `"${verse.text}" - ${verse.book.name} ${verse.chapter}:${verse.number}`,
+                                    text: `"${verse.text}" - ${bookName} ${chapterNumber}:${verse.number}`,
                                     url: window.location.href
                                 }).catch(() => { });
                             } else {

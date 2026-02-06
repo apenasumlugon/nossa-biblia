@@ -299,6 +299,9 @@ export default function Header() {
                                     </span>
                                 )}
                             </Link>
+                            <div className="mt-4 px-3 text-xs text-[var(--color-text-muted)] border-t border-[var(--color-surface-lighter)] pt-4">
+                                Versão 2.1 (Offline Ready)
+                            </div>
                         </nav>
                     </div>
                 )}
