@@ -1,30 +1,13 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import {
-    isSupabaseConfigured,
-    getCoupleCode,
-    removeCoupleCode,
-    generateCoupleCode,
-    createCoupleCode,
-    joinCoupleCode,
-    syncFavoritesToCloud,
-    fetchFavoritesFromCloud,
-    subscribeToFavorites,
-    unsubscribeFromFavorites
-} from '../services/supabaseClient';
+import { supabase } from '../services/supabaseClient';
 
 const FAVORITES_STORAGE_KEY = 'bible-reader-favorites';
-const USER_NAME_KEY = 'bible-user-name';
 
 const FavoritesContext = createContext(null);
 
 export function FavoritesProvider({ children }) {
     const [favorites, setFavorites] = useState([]);
     const [isLoaded, setIsLoaded] = useState(false);
-    const [coupleCode, setCoupleCode] = useState(getCoupleCode());
-    const [userName, setUserName] = useState(localStorage.getItem(USER_NAME_KEY) || '');
-    const [isSyncing, setIsSyncing] = useState(false);
-    const [syncError, setSyncError] = useState(null);
-    const [isConnected, setIsConnected] = useState(false);
 
     // Load favorites from localStorage on mount
     useEffect(() => {
@@ -52,40 +35,6 @@ export function FavoritesProvider({ children }) {
             }
         }
     }, [favorites, isLoaded]);
-
-    // Subscribe to real-time updates when connected
-    useEffect(() => {
-        if (!coupleCode || !isSupabaseConfigured()) return;
-
-        const subscription = subscribeToFavorites((cloudFavorites) => {
-            setFavorites(cloudFavorites);
-        });
-
-        setIsConnected(true);
-
-        return () => {
-            if (subscription) {
-                unsubscribeFromFavorites(subscription);
-            }
-        };
-    }, [coupleCode]);
-
-    // Sync to cloud when favorites change and connected
-    useEffect(() => {
-        if (!isLoaded || !coupleCode || !isSupabaseConfigured()) return;
-
-        const syncTimeout = setTimeout(() => {
-            syncFavoritesToCloud(favorites).then(({ success, error }) => {
-                if (!success && error) {
-                    setSyncError(error);
-                } else {
-                    setSyncError(null);
-                }
-            });
-        }, 1000); // Debounce sync
-
-        return () => clearTimeout(syncTimeout);
-    }, [favorites, isLoaded, coupleCode]);
 
     /**
      * Generate a unique ID for a verse
@@ -116,7 +65,7 @@ export function FavoritesProvider({ children }) {
             number: verse.number,
             text: verse.text,
             addedAt: new Date().toISOString(),
-            addedBy: userName || 'Anônimo'
+            // addedBy: removed for now in MVP refactor
         };
 
         setFavorites((prev) => {
@@ -125,7 +74,7 @@ export function FavoritesProvider({ children }) {
             }
             return [favoriteVerse, ...prev];
         });
-    }, [generateVerseId, userName]);
+    }, [generateVerseId]);
 
     /**
      * Remove a verse from favorites
@@ -153,97 +102,6 @@ export function FavoritesProvider({ children }) {
         setFavorites([]);
     }, []);
 
-    /**
-     * Create a new couple connection
-     */
-    const createConnection = useCallback(async (name) => {
-        setIsSyncing(true);
-        setSyncError(null);
-
-        try {
-            const code = generateCoupleCode();
-            const { success, error } = await createCoupleCode(code);
-
-            if (success) {
-                setCoupleCode(code);
-                setUserName(name);
-                localStorage.setItem(USER_NAME_KEY, name);
-
-                // Sync existing favorites to cloud
-                await syncFavoritesToCloud(favorites);
-
-                return { success: true, code, error: null };
-            } else {
-                return { success: false, code: null, error };
-            }
-        } catch (err) {
-            return { success: false, code: null, error: err.message };
-        } finally {
-            setIsSyncing(false);
-        }
-    }, [favorites]);
-
-    /**
-     * Join an existing couple connection
-     */
-    const joinConnection = useCallback(async (code, name) => {
-        setIsSyncing(true);
-        setSyncError(null);
-
-        try {
-            const { success, error } = await joinCoupleCode(code);
-
-            if (success) {
-                setCoupleCode(code.toUpperCase());
-                setUserName(name);
-                localStorage.setItem(USER_NAME_KEY, name);
-
-                // Fetch favorites from cloud
-                const { favorites: cloudFavorites } = await fetchFavoritesFromCloud();
-                if (cloudFavorites.length > 0) {
-                    setFavorites(cloudFavorites);
-                }
-
-                return { success: true, error: null };
-            } else {
-                return { success: false, error };
-            }
-        } catch (err) {
-            return { success: false, error: err.message };
-        } finally {
-            setIsSyncing(false);
-        }
-    }, []);
-
-    /**
-     * Disconnect from couple sync
-     */
-    const disconnect = useCallback(() => {
-        removeCoupleCode();
-        setCoupleCode(null);
-        setIsConnected(false);
-        setSyncError(null);
-    }, []);
-
-    /**
-     * Manually refresh from cloud
-     */
-    const refreshFromCloud = useCallback(async () => {
-        if (!coupleCode) return;
-
-        setIsSyncing(true);
-        try {
-            const { favorites: cloudFavorites, error } = await fetchFavoritesFromCloud();
-            if (!error) {
-                setFavorites(cloudFavorites);
-            } else {
-                setSyncError(error);
-            }
-        } finally {
-            setIsSyncing(false);
-        }
-    }, [coupleCode]);
-
     const value = {
         favorites,
         isLoaded,
@@ -252,18 +110,7 @@ export function FavoritesProvider({ children }) {
         removeFavorite,
         toggleFavorite,
         clearFavorites,
-        favoritesCount: favorites.length,
-        // Sync related
-        coupleCode,
-        userName,
-        isSyncing,
-        syncError,
-        isConnected,
-        isSupabaseReady: isSupabaseConfigured(),
-        createConnection,
-        joinConnection,
-        disconnect,
-        refreshFromCloud
+        favoritesCount: favorites.length
     };
 
     return (
@@ -281,5 +128,3 @@ export function useFavorites() {
     }
     return context;
 }
-
-
