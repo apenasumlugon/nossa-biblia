@@ -1,0 +1,728 @@
+[
+  {
+    "abbrev": {
+      "pt": "gn",
+      "en": "gn"
+    },
+    "name": "Gênesis",
+    "chapters": 50,
+    "testament": "VT",
+    "author": "Moisés",
+    "group": "Pentateuco"
+  },
+  {
+    "abbrev": {
+      "pt": "ex",
+      "en": "ex"
+    },
+    "name": "Êxodo",
+    "chapters": 40,
+    "testament": "VT",
+    "author": "Moisés",
+    "group": "Pentateuco"
+  },
+  {
+    "abbrev": {
+      "pt": "lv",
+      "en": "lv"
+    },
+    "name": "Levítico",
+    "chapters": 27,
+    "testament": "VT",
+    "author": "Moisés",
+    "group": "Pentateuco"
+  },
+  {
+    "abbrev": {
+      "pt": "nm",
+      "en": "nm"
+    },
+    "name": "Números",
+    "chapters": 36,
+    "testament": "VT",
+    "author": "Moisés",
+    "group": "Pentateuco"
+  },
+  {
+    "abbrev": {
+      "pt": "dt",
+      "en": "dt"
+    },
+    "name": "Deuteronômio",
+    "chapters": 34,
+    "testament": "VT",
+    "author": "Moisés",
+    "group": "Pentateuco"
+  },
+  {
+    "abbrev": {
+      "pt": "js",
+      "en": "js"
+    },
+    "name": "Josué",
+    "chapters": 24,
+    "testament": "VT",
+    "author": "Josué",
+    "group": "Históricos"
+  },
+  {
+    "abbrev": {
+      "pt": "jz",
+      "en": "jz"
+    },
+    "name": "Juízes",
+    "chapters": 21,
+    "testament": "VT",
+    "author": "Samuel",
+    "group": "Históricos"
+  },
+  {
+    "abbrev": {
+      "pt": "rt",
+      "en": "rt"
+    },
+    "name": "Rute",
+    "chapters": 4,
+    "testament": "VT",
+    "author": "Samuel",
+    "group": "Históricos"
+  },
+  {
+    "abbrev": {
+      "pt": "1sm",
+      "en": "1sm"
+    },
+    "name": "1 Samuel",
+    "chapters": 31,
+    "testament": "VT",
+    "author": "Samuel",
+    "group": "Históricos"
+  },
+  {
+    "abbrev": {
+      "pt": "2sm",
+      "en": "2sm"
+    },
+    "name": "2 Samuel",
+    "chapters": 24,
+    "testament": "VT",
+    "author": "Samuel",
+    "group": "Históricos"
+  },
+  {
+    "abbrev": {
+      "pt": "1rs",
+      "en": "1rs"
+    },
+    "name": "1 Reis",
+    "chapters": 22,
+    "testament": "VT",
+    "author": "Jeremias",
+    "group": "Históricos"
+  },
+  {
+    "abbrev": {
+      "pt": "2rs",
+      "en": "2rs"
+    },
+    "name": "2 Reis",
+    "chapters": 25,
+    "testament": "VT",
+    "author": "Jeremias",
+    "group": "Históricos"
+  },
+  {
+    "abbrev": {
+      "pt": "1cr",
+      "en": "1cr"
+    },
+    "name": "1 Crônicas",
+    "chapters": 29,
+    "testament": "VT",
+    "author": "Esdras",
+    "group": "Históricos"
+  },
+  {
+    "abbrev": {
+      "pt": "2cr",
+      "en": "2cr"
+    },
+    "name": "2 Crônicas",
+    "chapters": 36,
+    "testament": "VT",
+    "author": "Esdras",
+    "group": "Históricos"
+  },
+  {
+    "abbrev": {
+      "pt": "ed",
+      "en": "ed"
+    },
+    "name": "Esdras",
+    "chapters": 10,
+    "testament": "VT",
+    "author": "Esdras",
+    "group": "Históricos"
+  },
+  {
+    "abbrev": {
+      "pt": "ne",
+      "en": "ne"
+    },
+    "name": "Neemias",
+    "chapters": 13,
+    "testament": "VT",
+    "author": "Neemias",
+    "group": "Históricos"
+  },
+  {
+    "abbrev": {
+      "pt": "et",
+      "en": "et"
+    },
+    "name": "Ester",
+    "chapters": 10,
+    "testament": "VT",
+    "author": "Desconhecido",
+    "group": "Históricos"
+  },
+  {
+    "abbrev": {
+      "pt": "jó",
+      "en": "jó"
+    },
+    "name": "Jó",
+    "chapters": 42,
+    "testament": "VT",
+    "author": "Desconhecido",
+    "group": "Poéticos"
+  },
+  {
+    "abbrev": {
+      "pt": "sl",
+      "en": "sl"
+    },
+    "name": "Salmos",
+    "chapters": 150,
+    "testament": "VT",
+    "author": "Davi e outros",
+    "group": "Poéticos"
+  },
+  {
+    "abbrev": {
+      "pt": "pv",
+      "en": "pv"
+    },
+    "name": "Provérbios",
+    "chapters": 31,
+    "testament": "VT",
+    "author": "Salomão",
+    "group": "Poéticos"
+  },
+  {
+    "abbrev": {
+      "pt": "ec",
+      "en": "ec"
+    },
+    "name": "Eclesiastes",
+    "chapters": 12,
+    "testament": "VT",
+    "author": "Salomão",
+    "group": "Poéticos"
+  },
+  {
+    "abbrev": {
+      "pt": "ct",
+      "en": "ct"
+    },
+    "name": "Cânticos",
+    "chapters": 8,
+    "testament": "VT",
+    "author": "Salomão",
+    "group": "Poéticos"
+  },
+  {
+    "abbrev": {
+      "pt": "is",
+      "en": "is"
+    },
+    "name": "Isaías",
+    "chapters": 66,
+    "testament": "VT",
+    "author": "Isaías",
+    "group": "Profetas Maiores"
+  },
+  {
+    "abbrev": {
+      "pt": "jr",
+      "en": "jr"
+    },
+    "name": "Jeremias",
+    "chapters": 52,
+    "testament": "VT",
+    "author": "Jeremias",
+    "group": "Profetas Maiores"
+  },
+  {
+    "abbrev": {
+      "pt": "lm",
+      "en": "lm"
+    },
+    "name": "Lamentações",
+    "chapters": 5,
+    "testament": "VT",
+    "author": "Jeremias",
+    "group": "Profetas Maiores"
+  },
+  {
+    "abbrev": {
+      "pt": "ez",
+      "en": "ez"
+    },
+    "name": "Ezequiel",
+    "chapters": 48,
+    "testament": "VT",
+    "author": "Ezequiel",
+    "group": "Profetas Maiores"
+  },
+  {
+    "abbrev": {
+      "pt": "dn",
+      "en": "dn"
+    },
+    "name": "Daniel",
+    "chapters": 12,
+    "testament": "VT",
+    "author": "Daniel",
+    "group": "Profetas Maiores"
+  },
+  {
+    "abbrev": {
+      "pt": "os",
+      "en": "os"
+    },
+    "name": "Oséias",
+    "chapters": 14,
+    "testament": "VT",
+    "author": "Oséias",
+    "group": "Profetas Menores"
+  },
+  {
+    "abbrev": {
+      "pt": "jl",
+      "en": "jl"
+    },
+    "name": "Joel",
+    "chapters": 3,
+    "testament": "VT",
+    "author": "Joel",
+    "group": "Profetas Menores"
+  },
+  {
+    "abbrev": {
+      "pt": "am",
+      "en": "am"
+    },
+    "name": "Amós",
+    "chapters": 9,
+    "testament": "VT",
+    "author": "Amós",
+    "group": "Profetas Menores"
+  },
+  {
+    "abbrev": {
+      "pt": "ob",
+      "en": "ob"
+    },
+    "name": "Obadias",
+    "chapters": 1,
+    "testament": "VT",
+    "author": "Obadias",
+    "group": "Profetas Menores"
+  },
+  {
+    "abbrev": {
+      "pt": "jn",
+      "en": "jn"
+    },
+    "name": "Jonas",
+    "chapters": 4,
+    "testament": "VT",
+    "author": "Jonas",
+    "group": "Profetas Menores"
+  },
+  {
+    "abbrev": {
+      "pt": "mq",
+      "en": "mq"
+    },
+    "name": "Miqueias",
+    "chapters": 7,
+    "testament": "VT",
+    "author": "Miqueias",
+    "group": "Profetas Menores"
+  },
+  {
+    "abbrev": {
+      "pt": "na",
+      "en": "na"
+    },
+    "name": "Naum",
+    "chapters": 3,
+    "testament": "VT",
+    "author": "Naum",
+    "group": "Profetas Menores"
+  },
+  {
+    "abbrev": {
+      "pt": "hc",
+      "en": "hc"
+    },
+    "name": "Habacuque",
+    "chapters": 3,
+    "testament": "VT",
+    "author": "Habacuque",
+    "group": "Profetas Menores"
+  },
+  {
+    "abbrev": {
+      "pt": "sf",
+      "en": "sf"
+    },
+    "name": "Sofonias",
+    "chapters": 3,
+    "testament": "VT",
+    "author": "Sofonias",
+    "group": "Profetas Menores"
+  },
+  {
+    "abbrev": {
+      "pt": "ag",
+      "en": "ag"
+    },
+    "name": "Ageu",
+    "chapters": 2,
+    "testament": "VT",
+    "author": "Ageu",
+    "group": "Profetas Menores"
+  },
+  {
+    "abbrev": {
+      "pt": "zc",
+      "en": "zc"
+    },
+    "name": "Zacarias",
+    "chapters": 14,
+    "testament": "VT",
+    "author": "Zacarias",
+    "group": "Profetas Menores"
+  },
+  {
+    "abbrev": {
+      "pt": "ml",
+      "en": "ml"
+    },
+    "name": "Malaquias",
+    "chapters": 4,
+    "testament": "VT",
+    "author": "Malaquias",
+    "group": "Profetas Menores"
+  },
+  {
+    "abbrev": {
+      "pt": "mt",
+      "en": "mt"
+    },
+    "name": "Mateus",
+    "chapters": 28,
+    "testament": "NT",
+    "author": "Mateus",
+    "group": "Evangelhos"
+  },
+  {
+    "abbrev": {
+      "pt": "mc",
+      "en": "mc"
+    },
+    "name": "Marcos",
+    "chapters": 16,
+    "testament": "NT",
+    "author": "Marcos",
+    "group": "Evangelhos"
+  },
+  {
+    "abbrev": {
+      "pt": "lc",
+      "en": "lc"
+    },
+    "name": "Lucas",
+    "chapters": 24,
+    "testament": "NT",
+    "author": "Lucas",
+    "group": "Evangelhos"
+  },
+  {
+    "abbrev": {
+      "pt": "jo",
+      "en": "jo"
+    },
+    "name": "João",
+    "chapters": 21,
+    "testament": "NT",
+    "author": "João",
+    "group": "Evangelhos"
+  },
+  {
+    "abbrev": {
+      "pt": "atos",
+      "en": "atos"
+    },
+    "name": "Atos",
+    "chapters": 28,
+    "testament": "VT",
+    "author": "Desconhecido",
+    "group": "Outros"
+  },
+  {
+    "abbrev": {
+      "pt": "rm",
+      "en": "rm"
+    },
+    "name": "Romanos",
+    "chapters": 16,
+    "testament": "NT",
+    "author": "Paulo",
+    "group": "Cartas Paulinas"
+  },
+  {
+    "abbrev": {
+      "pt": "1co",
+      "en": "1co"
+    },
+    "name": "1 Coríntios",
+    "chapters": 16,
+    "testament": "NT",
+    "author": "Paulo",
+    "group": "Cartas Paulinas"
+  },
+  {
+    "abbrev": {
+      "pt": "2co",
+      "en": "2co"
+    },
+    "name": "2 Coríntios",
+    "chapters": 13,
+    "testament": "NT",
+    "author": "Paulo",
+    "group": "Cartas Paulinas"
+  },
+  {
+    "abbrev": {
+      "pt": "gl",
+      "en": "gl"
+    },
+    "name": "Gálatas",
+    "chapters": 6,
+    "testament": "NT",
+    "author": "Paulo",
+    "group": "Cartas Paulinas"
+  },
+  {
+    "abbrev": {
+      "pt": "ef",
+      "en": "ef"
+    },
+    "name": "Efésios",
+    "chapters": 6,
+    "testament": "NT",
+    "author": "Paulo",
+    "group": "Cartas Paulinas"
+  },
+  {
+    "abbrev": {
+      "pt": "fp",
+      "en": "fp"
+    },
+    "name": "Filipenses",
+    "chapters": 4,
+    "testament": "NT",
+    "author": "Paulo",
+    "group": "Cartas Paulinas"
+  },
+  {
+    "abbrev": {
+      "pt": "cl",
+      "en": "cl"
+    },
+    "name": "Colossenses",
+    "chapters": 4,
+    "testament": "NT",
+    "author": "Paulo",
+    "group": "Cartas Paulinas"
+  },
+  {
+    "abbrev": {
+      "pt": "1ts",
+      "en": "1ts"
+    },
+    "name": "1 Tessalonicenses",
+    "chapters": 5,
+    "testament": "NT",
+    "author": "Paulo",
+    "group": "Cartas Paulinas"
+  },
+  {
+    "abbrev": {
+      "pt": "2ts",
+      "en": "2ts"
+    },
+    "name": "2 Tessalonicenses",
+    "chapters": 3,
+    "testament": "NT",
+    "author": "Paulo",
+    "group": "Cartas Paulinas"
+  },
+  {
+    "abbrev": {
+      "pt": "1tm",
+      "en": "1tm"
+    },
+    "name": "1 Timóteo",
+    "chapters": 6,
+    "testament": "NT",
+    "author": "Paulo",
+    "group": "Cartas Paulinas"
+  },
+  {
+    "abbrev": {
+      "pt": "2tm",
+      "en": "2tm"
+    },
+    "name": "2 Timóteo",
+    "chapters": 4,
+    "testament": "NT",
+    "author": "Paulo",
+    "group": "Cartas Paulinas"
+  },
+  {
+    "abbrev": {
+      "pt": "tt",
+      "en": "tt"
+    },
+    "name": "Tito",
+    "chapters": 3,
+    "testament": "NT",
+    "author": "Paulo",
+    "group": "Cartas Paulinas"
+  },
+  {
+    "abbrev": {
+      "pt": "fm",
+      "en": "fm"
+    },
+    "name": "Filemom",
+    "chapters": 1,
+    "testament": "NT",
+    "author": "Paulo",
+    "group": "Cartas Paulinas"
+  },
+  {
+    "abbrev": {
+      "pt": "hb",
+      "en": "hb"
+    },
+    "name": "Hebreus",
+    "chapters": 13,
+    "testament": "NT",
+    "author": "Desconhecido",
+    "group": "Cartas Gerais"
+  },
+  {
+    "abbrev": {
+      "pt": "tg",
+      "en": "tg"
+    },
+    "name": "Tiago",
+    "chapters": 5,
+    "testament": "NT",
+    "author": "Tiago",
+    "group": "Cartas Gerais"
+  },
+  {
+    "abbrev": {
+      "pt": "1pe",
+      "en": "1pe"
+    },
+    "name": "1 Pedro",
+    "chapters": 5,
+    "testament": "NT",
+    "author": "Pedro",
+    "group": "Cartas Gerais"
+  },
+  {
+    "abbrev": {
+      "pt": "2pe",
+      "en": "2pe"
+    },
+    "name": "2 Pedro",
+    "chapters": 3,
+    "testament": "NT",
+    "author": "Pedro",
+    "group": "Cartas Gerais"
+  },
+  {
+    "abbrev": {
+      "pt": "1jo",
+      "en": "1jo"
+    },
+    "name": "1 João",
+    "chapters": 5,
+    "testament": "NT",
+    "author": "João",
+    "group": "Cartas Gerais"
+  },
+  {
+    "abbrev": {
+      "pt": "2jo",
+      "en": "2jo"
+    },
+    "name": "2 João",
+    "chapters": 1,
+    "testament": "NT",
+    "author": "João",
+    "group": "Cartas Gerais"
+  },
+  {
+    "abbrev": {
+      "pt": "3jo",
+      "en": "3jo"
+    },
+    "name": "3 João",
+    "chapters": 1,
+    "testament": "NT",
+    "author": "João",
+    "group": "Cartas Gerais"
+  },
+  {
+    "abbrev": {
+      "pt": "jd",
+      "en": "jd"
+    },
+    "name": "Judas",
+    "chapters": 1,
+    "testament": "NT",
+    "author": "Judas",
+    "group": "Cartas Gerais"
+  },
+  {
+    "abbrev": {
+      "pt": "ap",
+      "en": "ap"
+    },
+    "name": "Apocalipse",
+    "chapters": 22,
+    "testament": "NT",
+    "author": "João",
+    "group": "Profético"
+  }
+]

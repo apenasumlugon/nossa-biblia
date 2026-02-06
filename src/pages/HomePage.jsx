@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, Sparkles, ChevronRight } from 'lucide-react';
 import { getRandomVerse } from '../services/bibleService';
@@ -8,7 +8,15 @@ import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 export default function HomePage() {
     const { loading } = useBible();
-    const [dailyVerse] = useState(() => getRandomVerse());
+    const [dailyVerse, setDailyVerse] = useState(null);
+
+    useEffect(() => {
+        let mounted = true;
+        getRandomVerse().then(verse => {
+            if (mounted) setDailyVerse(verse);
+        }).catch(console.error);
+        return () => { mounted = false; };
+    }, []);
 
     if (loading) {
         return (

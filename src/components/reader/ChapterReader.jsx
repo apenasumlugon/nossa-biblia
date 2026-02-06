@@ -39,15 +39,33 @@ export default function ChapterReader() {
     const chapterNum = parseInt(chapter);
     const book = getBookByAbbrev(abbrev);
 
-    // Get chapter data using useMemo since it's a synchronous local operation
-    // This avoids the 'setState inside useEffect' warning and simplifies the code
-    const chapterData = useMemo(() => {
-        return getChapter(abbrev, chapterNum);
-    }, [abbrev, chapterNum]);
+    const [chapterData, setChapterData] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    // We don't really need a loading state for local data, but if we want to simulate
-    // a transition we can, but simpler is better.
-    const loading = false;
+    // Fetch chapter data asynchronously
+    useEffect(() => {
+        let mounted = true;
+        setLoading(true);
+
+        getChapter(abbrev, chapterNum)
+            .then((data) => {
+                if (mounted) {
+                    setChapterData(data);
+                    setLoading(false);
+                }
+            })
+            .catch((err) => {
+                console.error("Error fetching chapter:", err);
+                if (mounted) {
+                    setChapterData(null);
+                    setLoading(false);
+                }
+            });
+
+        return () => {
+            mounted = false;
+        };
+    }, [abbrev, chapterNum]);
 
     // Scroll to highlighted verse
     useEffect(() => {
