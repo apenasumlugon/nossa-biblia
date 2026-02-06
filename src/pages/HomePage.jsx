@@ -1,20 +1,42 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Map, ChevronRight, ChevronLeft, Scroll } from 'lucide-react';
+import { BookOpen, Map, ChevronRight, ChevronLeft, Scroll, Heart } from 'lucide-react';
 import { getRandomVerse } from '../services/bibleService';
 import { useBible } from '../context/BibleContext';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import { supabase, getProfile, getPartnerActivity } from '../services/supabaseClient';
 
 export default function HomePage() {
     const { oldTestament, newTestament, loading } = useBible();
     const [dailyVerse, setDailyVerse] = useState(null);
     const [view, setView] = useState('HOME'); // 'HOME', 'OLD', 'NEW'
 
+    // Couple State
+    const [user, setUser] = useState(null);
+    const [partnerProfile, setPartnerProfile] = useState(null);
+    const [partnerActivity, setPartnerActivity] = useState(null);
+
     useEffect(() => {
         let mounted = true;
         getRandomVerse().then(verse => {
             if (mounted) setDailyVerse(verse);
         }).catch(console.error);
+
+        // Load User & Partner Data
+        if (supabase) {
+            supabase.auth.getUser().then(async ({ data: { user } }) => {
+                if (mounted && user) {
+                    setUser(user);
+                    const profile = await getProfile(user.id);
+                    if (profile?.partner) {
+                        setPartnerProfile(profile.partner);
+                        const activity = await getPartnerActivity(profile.partner.id);
+                        if (mounted) setPartnerActivity(activity);
+                    }
+                }
+            });
+        }
+
         return () => { mounted = false; };
     }, []);
 
@@ -75,6 +97,36 @@ export default function HomePage() {
 
             {view === 'HOME' && (
                 <div className="space-y-8 animate-fade-in py-8">
+
+                    {/* Partner Presence Widget (New) */}
+                    {partnerProfile && (
+                        <div className="flex items-center gap-4 p-4 bg-[var(--color-surface)] rounded-2xl border border-[var(--color-primary)]/20 shadow-glow animate-slide-up">
+                            <div className="relative">
+                                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[var(--color-primary)]">
+                                    {partnerProfile.avatar_url ? (
+                                        <img src={partnerProfile.avatar_url} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full bg-[var(--color-surface-lighter)] flex items-center justify-center">
+                                            <Heart className="w-5 h-5 text-[var(--color-primary)] fill-current" />
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-[var(--color-surface)]"></div>
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-[var(--color-text)]">
+                                    {partnerProfile.full_name || 'Seu Amor'}
+                                </p>
+                                <p className="text-xs text-[var(--color-text-muted)]">
+                                    {partnerActivity ? (
+                                        <span>Leu {partnerActivity.book_abbrev} {partnerActivity.chapter} hoje</span>
+                                    ) : (
+                                        <span>Conectado no amor</span>
+                                    )}
+                                </p>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Verse of the Day - Premium Card */}
                     {dailyVerse && (

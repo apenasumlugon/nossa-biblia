@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation, useParams } from 'react-router-dom';
-import { Search, X, Book, Heart, Home, Menu, ChevronRight, ChevronDown } from 'lucide-react';
+import { Search, X, Book, Heart, Home, Menu, ChevronRight, ChevronDown, User, LogIn } from 'lucide-react';
 import { searchVerses, getBookByAbbrev } from '../../services/bibleService';
 import { useFavorites } from '../../context/FavoritesContext';
+import { supabase } from '../../services/supabaseClient';
 
 export default function Header() {
     const navigate = useNavigate();
@@ -17,6 +18,7 @@ export default function Header() {
     const [showResults, setShowResults] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [showChapterSelect, setShowChapterSelect] = useState(false);
+    const [user, setUser] = useState(null);
 
     const searchRef = useRef(null);
     const debounceRef = useRef(null);
@@ -26,6 +28,17 @@ export default function Header() {
     const currentChapter = chapter ? parseInt(chapter) : null;
 
     const isHome = location.pathname === '/';
+
+    useEffect(() => {
+        if (!supabase) return;
+        supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null);
+        });
+
+        return () => subscription.unsubscribe();
+    }, []);
 
     // Close search results and chapter select when clicking outside
     useEffect(() => {
@@ -196,6 +209,15 @@ export default function Header() {
                                 <span className="absolute top-1 right-1 w-2 h-2 bg-[var(--color-primary)] rounded-full"></span>
                             )}
                         </Link>
+                        {user ? (
+                            <Link to="/profile" className="btn btn-ghost btn-icon relative group">
+                                <User className="w-5 h-5 text-[var(--color-primary)]" />
+                            </Link>
+                        ) : (
+                            <Link to="/login" className="btn btn-ghost btn-icon relative group">
+                                <LogIn className="w-5 h-5 text-[var(--color-text-secondary)]" />
+                            </Link>
+                        )}
                     </nav>
 
                     {/* Mobile Menu Button */}
@@ -238,6 +260,17 @@ export default function Header() {
                         )}
 
                         <nav className="flex flex-col gap-2">
+                            {user ? (
+                                <Link to="/profile" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-3 p-3 rounded-xl ${isActive('/profile') ? 'bg-[var(--color-surface-light)] text-[var(--color-text)]' : 'text-[var(--color-text-secondary)]'}`}>
+                                    <User className="w-5 h-5" />
+                                    <span className="font-medium">Meu Perfil</span>
+                                </Link>
+                            ) : (
+                                <Link to="/login" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-3 p-3 rounded-xl ${isActive('/login') ? 'bg-[var(--color-surface-light)] text-[var(--color-text)]' : 'text-[var(--color-text-secondary)]'}`}>
+                                    <LogIn className="w-5 h-5" />
+                                    <span className="font-medium">Entrar / Conectar</span>
+                                </Link>
+                            )}
                             <Link to="/" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-3 p-3 rounded-xl ${isActive('/') ? 'bg-[var(--color-surface-light)] text-[var(--color-text)]' : 'text-[var(--color-text-secondary)]'}`}>
                                 <Home className="w-5 h-5" />
                                 <span className="font-medium">Início</span>
@@ -248,7 +281,7 @@ export default function Header() {
                                 {favoritesCount > 0 && <span className="ml-auto text-xs font-bold bg-[var(--color-surface-lighter)] px-2 py-0.5 rounded-full">{favoritesCount}</span>}
                             </Link>
                             <div className="mt-4 px-3 text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest text-center opacity-50">
-                                Versão 2.1 • Offline Ready
+                                Versão 2.2 • Offline Ready
                             </div>
                         </nav>
                     </div>

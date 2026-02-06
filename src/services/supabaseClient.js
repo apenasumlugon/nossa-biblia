@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Supabase configuration - você vai substituir esses valores
+// Supabase configuration
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
@@ -16,222 +16,123 @@ export const isSupabaseConfigured = () => {
     return supabase !== null;
 };
 
-/**
- * Generate a random couple code (6 characters)
- */
-export const generateCoupleCode = () => {
-    const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let code = '';
-    for (let i = 0; i < 6; i++) {
-        code += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-    return code;
-};
+// --- COUPLE & PROFILE MANAGEMENT ---
 
 /**
- * Save couple code to localStorage
+ * Get current user profile with partner info
  */
-export const saveCoupleCode = (code) => {
-    localStorage.setItem('bible-couple-code', code.toUpperCase());
-};
-
-/**
- * Get couple code from localStorage
- */
-export const getCoupleCode = () => {
-    return localStorage.getItem('bible-couple-code');
-};
-
-/**
- * Remove couple code from localStorage
- */
-export const removeCoupleCode = () => {
-    localStorage.removeItem('bible-couple-code');
-};
-
-/**
- * Check if a couple code exists in the database
- */
-export const checkCoupleCodeExists = async (code) => {
-    if (!supabase) return { exists: false, error: 'Supabase not configured' };
-
+export const getProfile = async (userId) => {
+    if (!supabase) return null;
     try {
         const { data, error } = await supabase
-            .from('couples')
-            .select('code')
-            .eq('code', code.toUpperCase())
+            .from('profiles')
+            .select('*, partner:partner_id(*)')
+            .eq('id', userId)
             .single();
-
-        if (error && error.code !== 'PGRST116') {
-            return { exists: false, error: error.message };
-        }
-
-        return { exists: !!data, error: null };
+        if (error) throw error;
+        return data;
     } catch (err) {
-        return { exists: false, error: err.message };
+        console.error('Error fetching profile:', err);
+        return null;
     }
 };
 
 /**
- * Create a new couple code in the database
+ * Update user activity (Current Book/Chapter)
  */
-export const createCoupleCode = async (code) => {
-    if (!supabase) return { success: false, error: 'Supabase not configured' };
-
+export const updateReadingActivity = async (userId, bookAbbrev, chapter) => {
+    if (!supabase) return;
     try {
         const { error } = await supabase
-            .from('couples')
-            .insert([{ code: code.toUpperCase(), created_at: new Date().toISOString() }]);
-
-        if (error) {
-            return { success: false, error: error.message };
-        }
-
-        saveCoupleCode(code);
-        return { success: true, error: null };
+            .from('reading_activity')
+            .insert({
+                user_id: userId,
+                book_abbrev: bookAbbrev,
+                chapter: chapter
+            });
+        if (error) throw error;
     } catch (err) {
-        return { success: false, error: err.message };
+        console.error('Error updating activity:', err);
     }
 };
 
 /**
- * Join an existing couple code
+ * Get Partner's Latest Activity
  */
-export const joinCoupleCode = async (code) => {
-    if (!supabase) return { success: false, error: 'Supabase not configured' };
-
-    const { exists, error } = await checkCoupleCodeExists(code);
-
-    if (error) {
-        return { success: false, error };
-    }
-
-    if (!exists) {
-        return { success: false, error: 'Código não encontrado' };
-    }
-
-    saveCoupleCode(code);
-    return { success: true, error: null };
-};
-
-/**
- * Sync favorites to Supabase
- */
-export const syncFavoritesToCloud = async (favorites) => {
-    if (!supabase) return { success: false, error: 'Supabase not configured' };
-
-    const coupleCode = getCoupleCode();
-    if (!coupleCode) return { success: false, error: 'No couple code set' };
-
-    try {
-        // First, delete existing favorites for this couple
-        await supabase
-            .from('favorites')
-            .delete()
-            .eq('couple_code', coupleCode);
-
-        // Then insert all current favorites
-        if (favorites.length > 0) {
-            const favoritesToInsert = favorites.map(fav => ({
-                couple_code: coupleCode,
-                verse_id: fav.id,
-                book_abbrev: fav.bookAbbrev,
-                book_name: fav.bookName,
-                chapter: fav.chapter,
-                verse_number: fav.number,
-                text: fav.text,
-                added_at: fav.addedAt,
-                added_by: localStorage.getItem('bible-user-name') || 'Anônimo'
-            }));
-
-            const { error } = await supabase
-                .from('favorites')
-                .insert(favoritesToInsert);
-
-            if (error) {
-                return { success: false, error: error.message };
-            }
-        }
-
-        return { success: true, error: null };
-    } catch (err) {
-        return { success: false, error: err.message };
-    }
-};
-
-/**
- * Fetch favorites from Supabase
- */
-export const fetchFavoritesFromCloud = async () => {
-    if (!supabase) return { favorites: [], error: 'Supabase not configured' };
-
-    const coupleCode = getCoupleCode();
-    if (!coupleCode) return { favorites: [], error: 'No couple code set' };
-
+export const getPartnerActivity = async (partnerId) => {
+    if (!supabase || !partnerId) return null;
     try {
         const { data, error } = await supabase
-            .from('favorites')
+            .from('reading_activity')
             .select('*')
-            .eq('couple_code', coupleCode)
-            .order('added_at', { ascending: false });
+            .eq('user_id', partnerId)
+            .order('completed_at', { ascending: false })
+            .limit(1)
+            .single();
 
-        if (error) {
-            return { favorites: [], error: error.message };
-        }
-
-        const favorites = data.map(fav => ({
-            id: fav.verse_id,
-            bookAbbrev: fav.book_abbrev,
-            bookName: fav.book_name,
-            chapter: fav.chapter,
-            number: fav.verse_number,
-            text: fav.text,
-            addedAt: fav.added_at,
-            addedBy: fav.added_by
-        }));
-
-        return { favorites, error: null };
+        if (error && error.code !== 'PGRST116') throw error; // Ignore no rows found
+        return data;
     } catch (err) {
-        return { favorites: [], error: err.message };
+        console.error('Error getting partner activity:', err);
+        return null;
     }
 };
 
 /**
- * Subscribe to real-time favorites changes
+ * Create a new couple link
  */
-export const subscribeToFavorites = (onUpdate) => {
-    if (!supabase) return null;
+export const createCoupleLink = async (userId) => {
+    if (!supabase) return { code: null, error: 'Config missing' };
 
-    const coupleCode = getCoupleCode();
-    if (!coupleCode) return null;
+    // Generate 6-char random code
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
 
-    const subscription = supabase
-        .channel('favorites-changes')
-        .on(
-            'postgres_changes',
-            {
-                event: '*',
-                schema: 'public',
-                table: 'favorites',
-                filter: `couple_code=eq.${coupleCode}`
-            },
-            () => {
-                // Fetch all favorites when any change occurs
-                fetchFavoritesFromCloud().then(({ favorites }) => {
-                    onUpdate(favorites);
-                });
-            }
-        )
-        .subscribe();
-
-    return subscription;
+    try {
+        const { error } = await supabase.from('couples').insert({
+            user1_id: userId,
+            connection_code: code
+        });
+        if (error) throw error;
+        return { code, error: null };
+    } catch (err) {
+        return { code: null, error: err.message };
+    }
 };
 
 /**
- * Unsubscribe from real-time updates
+ * Join an existing couple via code
  */
-export const unsubscribeFromFavorites = (subscription) => {
-    if (subscription && supabase) {
-        supabase.removeChannel(subscription);
+export const joinCouple = async (userId, code) => {
+    if (!supabase) return { success: false, error: 'Config missing' };
+
+    try {
+        // Find couple record
+        const { data: couple, error: findError } = await supabase
+            .from('couples')
+            .select('*')
+            .eq('connection_code', code.toUpperCase())
+            .single();
+
+        if (findError || !couple) throw new Error('Código inválido ou não encontrado.');
+
+        if (couple.user2_id) throw new Error('Este código já foi usado por um casal.');
+
+        // Update couple record
+        const { error: updateError } = await supabase
+            .from('couples')
+            .update({ user2_id: userId })
+            .eq('id', couple.id);
+
+        if (updateError) throw updateError;
+
+        // Link profiles reciprocally
+        await supabase.from('profiles').update({ partner_id: couple.user1_id }).eq('id', userId);
+        await supabase.from('profiles').update({ partner_id: userId }).eq('id', couple.user1_id);
+
+        return { success: true, error: null };
+    } catch (err) {
+        return { success: false, error: err.message };
     }
-};
+}
