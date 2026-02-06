@@ -3,9 +3,6 @@ import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import {
     ChevronLeft,
     ChevronRight,
-    Heart,
-    BookOpen,
-    Share2,
     Settings,
     Minus,
     Plus
@@ -13,7 +10,9 @@ import {
 import { getChapter } from '../../services/bibleService';
 import { useBible } from '../../context/BibleContext';
 import { useFavorites } from '../../context/FavoritesContext';
+import { useHighlights } from '../../context/HighlightsContext';
 import SkeletonLoader from '../ui/SkeletonLoader';
+import VerseMenu from './VerseMenu';
 
 export default function ChapterReader() {
     const { abbrev, chapter } = useParams();
@@ -21,12 +20,17 @@ export default function ChapterReader() {
     const location = useLocation();
     const { getBookByAbbrev, getBookName } = useBible();
     const { isFavorite, toggleFavorite } = useFavorites();
+    const { addHighlight, removeHighlight, getHighlight } = useHighlights();
 
     const [fontSize, setFontSize] = useState(() => {
         const saved = localStorage.getItem('bible-font-size');
         return saved ? parseInt(saved) : 18;
     });
     const [showSettings, setShowSettings] = useState(false);
+
+    // Verse Menu State
+    const [selectedVerse, setSelectedVerse] = useState(null);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const contentRef = useRef(null);
     const highlightVerse = location.state?.highlightVerse;
@@ -99,30 +103,30 @@ export default function ChapterReader() {
         }
     };
 
-    const handleToggleFavorite = (verse) => {
+    const handleVerseClick = (verse) => {
+        setSelectedVerse(verse);
+        setIsMenuOpen(true);
+    };
+
+    const handleHighlight = (color) => {
+        if (!selectedVerse) return;
+
+        if (color) {
+            addHighlight(abbrev, chapterNum, selectedVerse.number, color);
+        } else {
+            removeHighlight(abbrev, chapterNum, selectedVerse.number);
+        }
+    };
+
+    const handleToggleFavorite = () => {
+        if (!selectedVerse) return;
         toggleFavorite({
             bookAbbrev: abbrev,
             bookName: getBookName(abbrev),
             chapter: chapterNum,
-            number: verse.number,
-            text: verse.text,
+            number: selectedVerse.number,
+            text: selectedVerse.text,
         });
-    };
-
-    const handleShare = async () => {
-        const url = window.location.href;
-        const text = `${getBookName(abbrev)} ${chapterNum} - Leitor Bíblico`;
-
-        if (navigator.share) {
-            try {
-                await navigator.share({ title: text, url });
-            } catch {
-                // User cancelled or error
-            }
-        } else {
-            navigator.clipboard.writeText(url);
-            alert('Link copiado para a área de transferência!');
-        }
     };
 
     const adjustFontSize = (delta) => {
@@ -131,7 +135,7 @@ export default function ChapterReader() {
 
     if (loading) {
         return (
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-4xl mx-auto px-4">
                 <SkeletonLoader variant="title" className="mb-6" />
                 <div className="space-y-4">
                     <SkeletonLoader variant="verse" count={8} />
@@ -142,14 +146,10 @@ export default function ChapterReader() {
 
     if (!chapterData) {
         return (
-            <div className="max-w-3xl mx-auto text-center py-12">
-                <BookOpen className="w-16 h-16 text-[var(--color-text-muted)] mx-auto mb-4" />
+            <div className="max-w-4xl mx-auto text-center py-12 px-4">
                 <h2 className="text-xl font-bold text-[var(--color-text)] mb-2">
                     Capítulo não encontrado
                 </h2>
-                <p className="text-[var(--color-text-secondary)] mb-6">
-                    O capítulo {chapterNum} de {getBookName(abbrev)} não foi encontrado.
-                </p>
                 <Link
                     to={`/book/${abbrev}`}
                     className="btn btn-primary inline-flex items-center gap-2"
@@ -162,45 +162,25 @@ export default function ChapterReader() {
     }
 
     return (
-        <div className="max-w-3xl mx-auto animate-fade-in">
-            {/* Header */}
-            <div className="flex items-center justify-between gap-4 mb-6">
-                <Link
-                    to={`/book/${abbrev}`}
-                    className="inline-flex items-center gap-2 text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors"
+        <div className="max-w-4xl mx-auto animate-fade-in px-2 sm:px-6">
+            {/* Header with Title and Settings */}
+            <div className="flex items-center justify-between mb-8 pb-4 border-b border-[var(--color-surface-lighter)]">
+                <h1 className="text-2xl sm:text-3xl font-bold text-[var(--color-text)] tracking-tight">
+                    {getBookName(abbrev)} {chapterNum}
+                </h1>
+
+                <button
+                    onClick={() => setShowSettings(!showSettings)}
+                    className={`btn btn-ghost btn-icon ${showSettings ? 'bg-[var(--color-surface)]' : ''}`}
+                    title="Configurações de leitura"
                 >
-                    <ChevronLeft className="w-4 h-4" />
-                    <span className="text-sm hidden sm:inline">Capítulos</span>
-                </Link>
-
-                <div className="flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-[var(--color-primary)]" />
-                    <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-text)]">
-                        {getBookName(abbrev)} {chapterNum}
-                    </h1>
-                </div>
-
-                <div className="flex items-center gap-1">
-                    <button
-                        onClick={() => setShowSettings(!showSettings)}
-                        className={`btn btn-ghost btn-icon ${showSettings ? 'bg-[var(--color-surface)]' : ''}`}
-                        title="Configurações de leitura"
-                    >
-                        <Settings className="w-4 h-4" />
-                    </button>
-                    <button
-                        onClick={handleShare}
-                        className="btn btn-ghost btn-icon"
-                        title="Compartilhar"
-                    >
-                        <Share2 className="w-4 h-4" />
-                    </button>
-                </div>
+                    <Settings className="w-5 h-5" />
+                </button>
             </div>
 
             {/* Settings Panel */}
             {showSettings && (
-                <div className="card p-4 mb-6 animate-fade-in">
+                <div className="card p-4 mb-8 animate-fade-in">
                     <div className="flex items-center justify-between">
                         <span className="text-sm text-[var(--color-text-secondary)]">
                             Tamanho da fonte
@@ -213,7 +193,7 @@ export default function ChapterReader() {
                             >
                                 <Minus className="w-4 h-4" />
                             </button>
-                            <span className="text-sm font-medium w-8 text-center">{fontSize}</span>
+                            <span className="text-sm font-medium min-w-[30px] text-center">{fontSize}px</span>
                             <button
                                 onClick={() => adjustFontSize(2)}
                                 className="btn btn-ghost btn-icon"
@@ -226,72 +206,89 @@ export default function ChapterReader() {
                 </div>
             )}
 
-            {/* Verses Content */}
+            {/* Verses Content - Improved Typography and Spacing */}
             <div
                 ref={contentRef}
-                className="card p-6 sm:p-8 mb-6"
+                className="mb-8"
             >
-                <div className="space-y-1">
-                    {chapterData?.verses?.map((verse) => (
-                        <div
-                            key={verse.number}
-                            id={`verse-${verse.number}`}
-                            className="group relative py-2 px-1 -mx-1 rounded-lg hover:bg-[var(--color-surface-light)] transition-colors"
-                        >
-                            <span
-                                className="font-reading leading-relaxed text-[var(--color-text)]"
-                                style={{ fontSize: `${fontSize}px`, lineHeight: 1.9 }}
-                            >
-                                <sup className="verse-number">{verse.number}</sup>
-                                {verse.text}
-                            </span>
+                <div>
+                    {/* 
+                       Using a continuous flow but with span wrapping for interactivity 
+                       We mimic YouVersion's style where verses flow together but are distinct click targets
+                     */}
+                    {chapterData?.verses?.map((verse) => {
+                        const highlight = getHighlight(abbrev, chapterNum, verse.number);
+                        const isFav = isFavorite(abbrev, chapterNum, verse.number);
 
-                            {/* Actions container */}
-                            <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-[var(--color-surface)]/80 backdrop-blur-sm pl-2 pr-1 rounded-full py-1">
-                                {/* Favorite Button */}
-                                <button
-                                    onClick={() => handleToggleFavorite(verse)}
-                                    className={`p-1.5 rounded-full transition-colors ${isFavorite(abbrev, chapterNum, verse.number)
-                                        ? 'text-[var(--color-primary)]'
-                                        : 'text-[var(--color-text-muted)] hover:text-[var(--color-primary)]'
-                                        }`}
-                                    title={isFavorite(abbrev, chapterNum, verse.number) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                        return (
+                            <span
+                                key={verse.number}
+                                id={`verse-${verse.number}`}
+                                onClick={() => handleVerseClick(verse)}
+                                className="verse-container hover:bg-[var(--color-surface-light)] transition-colors rounded decoration-clone box-decoration-clone px-1 -mx-1"
+                                style={{
+                                    backgroundColor: highlight ? `var(--highlight-${highlight.color})` : 'transparent',
+                                    borderBottom: isFav ? '1px dashed var(--color-primary)' : 'none'
+                                }}
+                            >
+                                <sup
+                                    className="verse-number font-bold text-[var(--color-text-muted)] mr-1 select-none"
+                                    style={{ fontSize: `${fontSize * 0.6}px` }}
                                 >
-                                    <Heart
-                                        className="w-5 h-5"
-                                        fill={isFavorite(abbrev, chapterNum, verse.number) ? 'currentColor' : 'none'}
-                                    />
-                                </button>
-                            </div>
-                        </div>
-                    ))}
+                                    {verse.number}
+                                </sup>
+                                <span
+                                    className="font-reading text-[var(--color-text)] leading-relaxed"
+                                    style={{
+                                        fontSize: `${fontSize}px`,
+                                        lineHeight: 1.8
+                                    }}
+                                >
+                                    {verse.text}{' '}
+                                </span>
+                            </span>
+                        );
+                    })}
                 </div>
             </div>
 
-            {/* Navigation */}
-            <div className="flex items-center justify-between gap-4">
+            {/* Bottom Navigation */}
+            <div className="flex items-center justify-between gap-4 mt-8 pt-6 border-t border-[var(--color-surface-lighter)]">
                 <button
                     onClick={handlePreviousChapter}
                     disabled={chapterNum <= 1}
-                    className="btn btn-secondary flex-1 sm:flex-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="btn btn-secondary flex-1 sm:flex-none disabled:opacity-50 disabled:cursor-not-allowed justify-center"
                 >
                     <ChevronLeft className="w-4 h-4" />
-                    <span className="hidden sm:inline">Capítulo</span> Anterior
+                    <span className="hidden sm:inline">Anterior</span>
                 </button>
 
-                <span className="text-sm text-[var(--color-text-muted)]">
-                    {chapterNum} / {book?.chapters || '?'}
-                </span>
+                <Link
+                    to={`/book/${abbrev}`}
+                    className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+                >
+                    Voltar aos Capítulos
+                </Link>
 
                 <button
                     onClick={handleNextChapter}
                     disabled={!book || chapterNum >= book.chapters}
-                    className="btn btn-primary flex-1 sm:flex-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="btn btn-primary flex-1 sm:flex-none disabled:opacity-50 disabled:cursor-not-allowed justify-center"
                 >
-                    Próximo <span className="hidden sm:inline">Capítulo</span>
+                    <span className="hidden sm:inline">Próximo</span>
                     <ChevronRight className="w-4 h-4" />
                 </button>
             </div>
+
+            {/* Verse Menu Portal */}
+            <VerseMenu
+                isOpen={isMenuOpen}
+                onClose={() => setIsMenuOpen(false)}
+                verse={selectedVerse}
+                onHighlight={handleHighlight}
+                onFavorite={handleToggleFavorite}
+                isFavorite={selectedVerse && isFavorite(abbrev, chapterNum, selectedVerse.number)}
+            />
         </div>
     );
 }

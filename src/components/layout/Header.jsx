@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { Search, X, Book, Heart, Home, Menu, ChevronRight } from 'lucide-react';
-import { searchVerses } from '../../services/bibleService';
+import { useNavigate, Link, useLocation, useParams } from 'react-router-dom';
+import { Search, X, Book, Heart, Home, Menu, ChevronRight, ChevronDown } from 'lucide-react';
+import { searchVerses, getBookByAbbrev } from '../../services/bibleService';
 import { useFavorites } from '../../context/FavoritesContext';
 
 export default function Header() {
     const navigate = useNavigate();
     const location = useLocation();
+    const { abbrev, chapter } = useParams(); // Get params if we are in reading mode
 
     const { favoritesCount } = useFavorites();
 
@@ -15,15 +16,24 @@ export default function Header() {
     const [isSearching, setIsSearching] = useState(false);
     const [showResults, setShowResults] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
+    const [showChapterSelect, setShowChapterSelect] = useState(false);
 
     const searchRef = useRef(null);
     const debounceRef = useRef(null);
+    const chapterSelectRef = useRef(null);
 
-    // Close search results when clicking outside
+    // Initial state derived from URL
+    const currentBook = abbrev ? getBookByAbbrev(abbrev) : null;
+    const currentChapter = chapter ? parseInt(chapter) : null;
+
+    // Close search results and chapter select when clicking outside
     useEffect(() => {
         function handleClickOutside(event) {
             if (searchRef.current && !searchRef.current.contains(event.target)) {
                 setShowResults(false);
+            }
+            if (chapterSelectRef.current && !chapterSelectRef.current.contains(event.target)) {
+                setShowChapterSelect(false);
             }
         }
         document.addEventListener('mousedown', handleClickOutside);
@@ -74,6 +84,11 @@ export default function Header() {
         setShowMobileMenu(false);
     };
 
+    const handleChapterSelect = (newChapter) => {
+        navigate(`/book/${abbrev}/${newChapter}`);
+        setShowChapterSelect(false);
+    }
+
     const clearSearch = () => {
         setSearchQuery('');
         setSearchResults([]);
@@ -86,20 +101,53 @@ export default function Header() {
         <header className="sticky top-0 z-50 glass border-b border-white/5">
             <div className="container">
                 <div className="flex items-center justify-between h-16 gap-4">
-                    {/* Logo */}
-                    <Link
-                        to="/"
-                        className="flex items-center gap-2 shrink-0 group"
-                    >
-                        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-dark)] flex items-center justify-center shadow-lg group-hover:shadow-[var(--shadow-glow)] transition-shadow">
-                            <Book className="w-5 h-5 text-[var(--color-background)]" />
-                        </div>
-                        <span className="font-semibold text-lg hidden sm:block gradient-text">
-                            Leitor Bíblico
-                        </span>
-                    </Link>
+                    {/* Left: Logo/Home or Chapter Selector if Reading */}
+                    <div className="flex items-center gap-4">
+                        <Link
+                            to="/"
+                            className="flex items-center gap-2 shrink-0 group"
+                        >
+                            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-dark)] flex items-center justify-center shadow-lg group-hover:shadow-[var(--shadow-glow)] transition-shadow">
+                                <Book className="w-5 h-5 text-[var(--color-background)]" />
+                            </div>
+                            <span className="font-semibold text-lg hidden sm:block gradient-text">
+                                Leitor Bíblico
+                            </span>
+                        </Link>
 
-                    {/* Search Bar - Desktop */}
+                        {/* Chapter Selector (Visible only when reading) */}
+                        {currentBook && currentChapter && (
+                            <div className="relative ml-2" ref={chapterSelectRef}>
+                                <button
+                                    onClick={() => setShowChapterSelect(!showChapterSelect)}
+                                    className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[var(--color-surface-light)] border border-[var(--color-surface-lighter)] hover:border-[var(--color-primary)] transition-colors text-sm font-medium"
+                                >
+                                    <span className="truncate max-w-[120px] sm:max-w-none">
+                                        {currentBook.name} {currentChapter}
+                                    </span>
+                                    <ChevronDown className="w-3 h-3 text-[var(--color-text-secondary)]" />
+                                </button>
+
+                                {showChapterSelect && (
+                                    <div className="absolute top-full left-0 mt-2 w-64 bg-[var(--color-surface)] border border-[var(--color-surface-lighter)] rounded-xl shadow-lg p-3 animate-fade-in max-h-80 overflow-y-auto z-50">
+                                        <div className="grid grid-cols-5 gap-1">
+                                            {Array.from({ length: currentBook.chapters }, (_, i) => i + 1).map(c => (
+                                                <button
+                                                    key={c}
+                                                    onClick={() => handleChapterSelect(c)}
+                                                    className={`p-2 rounded-lg text-sm font-medium hover:bg-[var(--color-surface-light)] transition-colors ${c === currentChapter ? 'bg-[var(--color-primary)] text-[var(--color-background)]' : 'text-[var(--color-text-secondary)]'}`}
+                                                >
+                                                    {c}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Center/Right: Search Bar - Desktop */}
                     <div ref={searchRef} className="relative flex-1 max-w-md hidden md:block">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)]" />
@@ -154,7 +202,7 @@ export default function Header() {
                         )}
                     </div>
 
-                    {/* Navigation - Desktop */}
+                    {/* Right: Navigation - Desktop */}
                     <nav className="hidden md:flex items-center gap-1">
                         <Link
                             to="/"
