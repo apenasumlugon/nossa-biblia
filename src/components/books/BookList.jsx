@@ -2,17 +2,12 @@ import { Link } from 'react-router-dom';
 import { ChevronRight, BookOpen, ScrollText } from 'lucide-react';
 import { useBible } from '../../context/BibleContext';
 import LoadingSpinner from '../ui/LoadingSpinner';
-import ErrorMessage from '../ui/ErrorMessage';
 
 export default function BookList() {
-    const { oldTestament, newTestament, loading, error, refetch } = useBible();
+    const { oldTestament, newTestament, loading } = useBible();
 
     if (loading) {
         return <LoadingSpinner text="Carregando livros da Bíblia..." />;
-    }
-
-    if (error) {
-        return <ErrorMessage message={error} onRetry={refetch} />;
     }
 
     return (

@@ -3,7 +3,6 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ChevronLeft, BookOpen } from 'lucide-react';
 import { useBible } from '../../context/BibleContext';
 import LoadingSpinner from '../ui/LoadingSpinner';
-import ErrorMessage from '../ui/ErrorMessage';
 
 export default function ChapterSelector() {
     const { abbrev } = useParams();
