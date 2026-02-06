@@ -8,24 +8,20 @@ import ErrorMessage from '../ui/ErrorMessage';
 export default function ChapterSelector() {
     const { abbrev } = useParams();
     const navigate = useNavigate();
-    const { getBookByAbbrev, loading, error } = useBible();
+    const { getBookByAbbrev, loading } = useBible();
 
     // Derive book directly from context/params to avoid useEffect state updates
     const book = getBookByAbbrev(abbrev);
 
     useEffect(() => {
-        if (!book && !loading && !error) {
+        if (!book && !loading) {
             // Book not found, redirect to home
             navigate('/', { replace: true });
         }
-    }, [book, loading, error, navigate]);
+    }, [book, loading, navigate]);
 
     if (loading) {
         return <LoadingSpinner text="Carregando..." />;
-    }
-
-    if (error) {
-        return <ErrorMessage message={error} />;
     }
 
     if (!book) {
