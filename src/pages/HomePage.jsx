@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Sparkles, ChevronRight } from 'lucide-react';
+import { BookOpen, Map, ChevronRight, ChevronLeft, Scroll } from 'lucide-react';
 import { getRandomVerse } from '../services/bibleService';
 import { useBible } from '../context/BibleContext';
-import BookList from '../components/books/BookList';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 export default function HomePage() {
-    const { loading } = useBible();
+    const { oldTestament, newTestament, loading } = useBible();
     const [dailyVerse, setDailyVerse] = useState(null);
+    const [view, setView] = useState('HOME'); // 'HOME', 'OLD', 'NEW'
 
     useEffect(() => {
         let mounted = true;
@@ -20,64 +20,154 @@ export default function HomePage() {
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh]">
+            <div className="flex flex-col items-center justify-center min-h-[60vh] animate-fade-in">
                 <LoadingSpinner size="lg" />
-                <p className="mt-4 text-[var(--color-text-secondary)]">
-                    Carregando a Palavra...
-                </p>
             </div>
         );
     }
 
-    return (
-        <div className="space-y-12">
-            {/* Hero Section */}
-            <section className="text-center py-8 sm:py-12">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] mb-6">
-                    <Sparkles className="w-4 h-4 text-[var(--color-primary)]" />
-                    <span className="text-sm text-[var(--color-text-secondary)]">
-                        Nova Versão Internacional
-                    </span>
-                </div>
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[var(--color-text)] mb-4">
-                    Leitor Bíblico
-                </h1>
-                <p className="text-lg text-[var(--color-text-secondary)] max-w-2xl mx-auto">
-                    Explore a Palavra de Deus com uma experiência de leitura moderna e
-                    elegante. Totalmente offline, sem depender de internet.
-                </p>
-            </section>
+    // Logic to render the list of books based on the selected view
+    const renderBookList = (books, title) => (
+        <div className="animate-slide-up pt-4 pb-12">
+            {/* Header for Book List */}
+            <div className="flex items-center gap-4 mb-8">
+                <button
+                    onClick={() => setView('HOME')}
+                    className="p-2 -ml-2 rounded-full hover:bg-[var(--color-surface-light)] text-[var(--color-text-secondary)] transition-colors"
+                >
+                    <ChevronLeft className="w-6 h-6" />
+                </button>
+                <h2 className="text-2xl font-bold text-[var(--color-text)] tracking-tight">
+                    {title}
+                </h2>
+            </div>
 
-            {/* Daily Verse */}
-            {dailyVerse && (
-                <section className="card card-glass p-6 sm:p-8 text-center max-w-3xl mx-auto">
-                    <div className="flex items-center justify-center gap-2 mb-4">
-                        <BookOpen className="w-5 h-5 text-[var(--color-primary)]" />
-                        <h2 className="text-sm font-medium text-[var(--color-primary)] uppercase tracking-wider">
-                            Versículo do Dia
-                        </h2>
-                    </div>
-                    <blockquote className="text-xl sm:text-2xl font-reading text-[var(--color-text)] leading-relaxed mb-4">
-                        "{dailyVerse.text}"
-                    </blockquote>
-                    <cite className="text-[var(--color-text-secondary)] not-italic">
-                        — {dailyVerse.book.name} {dailyVerse.chapter}:{dailyVerse.number}
-                    </cite>
-                    <div className="mt-6">
-                        <Link
-                            to={`/book/${dailyVerse.book.abbrev.pt}/${dailyVerse.chapter}`}
-                            state={{ highlightVerse: dailyVerse.number }}
-                            className="btn btn-secondary inline-flex items-center gap-2"
+            {/* List of Books - iOS Style List */}
+            <div className="bg-[var(--color-surface)] rounded-3xl overflow-hidden border border-[var(--color-surface-lighter)] shadow-sm">
+                {books.map((book, index) => (
+                    <Link
+                        key={book.abbrev.pt}
+                        to={`/book/${book.abbrev.pt}`}
+                        className={`
+                            flex items-center justify-between p-5 
+                            hover:bg-[var(--color-surface-light)] active:bg-[var(--color-surface-lighter)] transition-colors
+                            ${index !== books.length - 1 ? 'border-b border-[var(--color-surface-lighter)]' : ''}
+                        `}
+                    >
+                        <div>
+                            <span className="text-lg font-medium text-[var(--color-text)]">
+                                {book.name}
+                            </span>
+                            <p className="text-xs text-[var(--color-text-muted)] mt-0.5 font-medium">
+                                {book.chapters} Capítulos
+                            </p>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-[var(--color-text-muted)] opacity-50" />
+                    </Link>
+                ))}
+            </div>
+        </div>
+    );
+
+    // Main Home View
+    return (
+        <div className="max-w-xl mx-auto min-h-[85vh] flex flex-col justify-center">
+
+            {view === 'HOME' && (
+                <div className="space-y-8 animate-fade-in py-8">
+
+                    {/* Verse of the Day - Premium Card */}
+                    {dailyVerse && (
+                        <div className="relative overflow-hidden bg-gradient-to-b from-[var(--color-surface-light)] to-[var(--color-surface)] rounded-[2rem] p-8 border border-[var(--color-surface-lighter)] shadow-lg group">
+                            {/* Subtle background glow */}
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--color-primary)] opacity-5 blur-[60px] rounded-full pointer-events-none"></div>
+
+                            <div className="flex flex-col items-center text-center space-y-6">
+                                <span className="text-xs font-bold tracking-[0.2em] text-[var(--color-primary)] uppercase opacity-80">
+                                    Versículo do Dia
+                                </span>
+
+                                <Link
+                                    to={`/book/${dailyVerse.book.abbrev.pt}/${dailyVerse.chapter}`}
+                                    state={{ highlightVerse: dailyVerse.number }}
+                                    className="block relative z-10"
+                                >
+                                    <h2 className="text-xl sm:text-2xl font-reading italic leading-relaxed text-[var(--color-text)] text-balance">
+                                        "{dailyVerse.text}"
+                                    </h2>
+                                </Link>
+
+                                <div className="h-px w-12 bg-[var(--color-primary)] opacity-30"></div>
+
+                                <span className="text-sm font-medium text-[var(--color-text-secondary)]">
+                                    {dailyVerse.book.name} {dailyVerse.chapter}:{dailyVerse.number}
+                                </span>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Navigation Blocks - Split View */}
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* Old Testament Block */}
+                        <button
+                            onClick={() => setView('OLD')}
+                            className="relative h-48 rounded-[2rem] p-6 flex flex-col justify-between items-start text-left group overflow-hidden transition-transform active:scale-95"
+                            style={{
+                                background: 'linear-gradient(135deg, #1c1c20 0%, #151518 100%)',
+                                boxShadow: '0 10px 30px -10px rgba(0,0,0,0.5)'
+                            }}
                         >
-                            Ler Capítulo
-                            <ChevronRight className="w-4 h-4" />
-                        </Link>
+                            <div className="absolute inset-0 bg-gradient-to-br from-amber-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+                            <div className="w-10 h-10 rounded-full bg-[var(--color-surface-light)] border border-white/5 flex items-center justify-center text-amber-500/80">
+                                <Scroll className="w-5 h-5" />
+                            </div>
+
+                            <div>
+                                <span className="block text-2xl font-bold text-[var(--color-text)] mb-1">
+                                    Antigo
+                                </span>
+                                <span className="text-sm text-[var(--color-text-muted)] font-medium">
+                                    Testamento
+                                </span>
+                            </div>
+                        </button>
+
+                        {/* New Testament Block */}
+                        <button
+                            onClick={() => setView('NEW')}
+                            className="relative h-48 rounded-[2rem] p-6 flex flex-col justify-between items-start text-left group overflow-hidden transition-transform active:scale-95"
+                            style={{
+                                background: 'linear-gradient(135deg, #1c1c20 0%, #151518 100%)',
+                                boxShadow: '0 10px 30px -10px rgba(0,0,0,0.5)'
+                            }}
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+                            <div className="w-10 h-10 rounded-full bg-[var(--color-surface-light)] border border-white/5 flex items-center justify-center text-indigo-400/80">
+                                <BookOpen className="w-5 h-5" />
+                            </div>
+
+                            <div>
+                                <span className="block text-2xl font-bold text-[var(--color-text)] mb-1">
+                                    Novo
+                                </span>
+                                <span className="text-sm text-[var(--color-text-muted)] font-medium">
+                                    Testamento
+                                </span>
+                            </div>
+                        </button>
                     </div>
-                </section>
+
+                    <p className="text-center text-xs text-[var(--color-text-muted)] opacity-40 pt-8">
+                        Nova Versão Internacional • Offline Ready
+                    </p>
+                </div>
             )}
 
-            {/* Book List */}
-            <BookList />
+            {view === 'OLD' && renderBookList(oldTestament, 'Antigo Testamento')}
+            {view === 'NEW' && renderBookList(newTestament, 'Novo Testamento')}
+
         </div>
     );
 }

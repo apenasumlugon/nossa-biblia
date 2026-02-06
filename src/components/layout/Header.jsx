@@ -7,7 +7,7 @@ import { useFavorites } from '../../context/FavoritesContext';
 export default function Header() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { abbrev, chapter } = useParams(); // Get params if we are in reading mode
+    const { abbrev, chapter } = useParams();
 
     const { favoritesCount } = useFavorites();
 
@@ -22,9 +22,10 @@ export default function Header() {
     const debounceRef = useRef(null);
     const chapterSelectRef = useRef(null);
 
-    // Initial state derived from URL
     const currentBook = abbrev ? getBookByAbbrev(abbrev) : null;
     const currentChapter = chapter ? parseInt(chapter) : null;
+
+    const isHome = location.pathname === '/';
 
     // Close search results and chapter select when clicking outside
     useEffect(() => {
@@ -40,22 +41,17 @@ export default function Header() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Debounced search
+    // Debounced search logic (unchanged)
     useEffect(() => {
-        if (debounceRef.current) {
-            clearTimeout(debounceRef.current);
-        }
-
+        if (debounceRef.current) clearTimeout(debounceRef.current);
         if (searchQuery.trim().length < 3) {
             setSearchResults([]);
             setShowResults(false);
             return;
         }
-
         debounceRef.current = setTimeout(() => {
             setIsSearching(true);
             try {
-                // Local search - synchronous, instant
                 const results = searchVerses(searchQuery.trim());
                 setSearchResults(results.verses?.slice(0, 10) || []);
                 setShowResults(true);
@@ -65,13 +61,8 @@ export default function Header() {
             } finally {
                 setIsSearching(false);
             }
-        }, 300); // Faster debounce since search is local
-
-        return () => {
-            if (debounceRef.current) {
-                clearTimeout(debounceRef.current);
-            }
-        };
+        }, 300);
+        return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
     }, [searchQuery]);
 
     const handleResultClick = (result) => {
@@ -98,29 +89,34 @@ export default function Header() {
     const isActive = (path) => location.pathname === path;
 
     return (
-        <header className="sticky top-0 z-50 glass border-b border-white/5">
+        <header className={`sticky top-0 z-50 transition-colors duration-300 ${isHome ? 'bg-[var(--color-background)]/80 backdrop-blur-md border-b-0' : 'glass border-b border-white/5'}`}>
             <div className="container">
                 <div className="flex items-center justify-between h-16 gap-4">
-                    {/* Left: Logo/Home or Chapter Selector if Reading */}
+                    {/* Left: Logo/Home or Chapter Selector */}
                     <div className="flex items-center gap-4">
                         <Link
                             to="/"
                             className="flex items-center gap-2 shrink-0 group"
                         >
-                            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-dark)] flex items-center justify-center shadow-lg group-hover:shadow-[var(--shadow-glow)] transition-shadow">
-                                <Book className="w-5 h-5 text-[var(--color-background)]" />
+                            {/* Only show logo icon on home to keep it minimal, or always show if reading */}
+                            <div className={`w-8 h-8 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-dark)] flex items-center justify-center shadow-lg transition-transform group-active:scale-95 ${isHome ? 'opacity-100' : 'opacity-100'}`}>
+                                <Book className="w-4 h-4 text-[#000]" strokeWidth={2.5} />
                             </div>
-                            <span className="font-semibold text-lg hidden sm:block gradient-text">
-                                Leitor Bíblico
-                            </span>
+
+                            {/* Hide text on home for extreme minimalism if desired, or keep small */}
+                            {!isHome && (
+                                <span className="font-semibold text-lg hidden sm:block text-[var(--color-text)] tracking-tight">
+                                    Leitor
+                                </span>
+                            )}
                         </Link>
 
-                        {/* Chapter Selector (Visible only when reading) */}
+                        {/* Chapter Selector (Reading Mode) */}
                         {currentBook && currentChapter && (
-                            <div className="relative ml-2" ref={chapterSelectRef}>
+                            <div className="relative ml-0 sm:ml-2" ref={chapterSelectRef}>
                                 <button
                                     onClick={() => setShowChapterSelect(!showChapterSelect)}
-                                    className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[var(--color-surface-light)] border border-[var(--color-surface-lighter)] hover:border-[var(--color-primary)] transition-colors text-sm font-medium"
+                                    className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[var(--color-surface-light)] hover:bg-[var(--color-surface-lighter)] transition-colors text-sm font-semibold text-[var(--color-text)]"
                                 >
                                     <span className="truncate max-w-[120px] sm:max-w-none">
                                         {currentBook.name} {currentChapter}
@@ -129,13 +125,13 @@ export default function Header() {
                                 </button>
 
                                 {showChapterSelect && (
-                                    <div className="absolute top-full left-0 mt-2 w-64 bg-[var(--color-surface)] border border-[var(--color-surface-lighter)] rounded-xl shadow-lg p-3 animate-fade-in max-h-80 overflow-y-auto z-50">
-                                        <div className="grid grid-cols-5 gap-1">
+                                    <div className="absolute top-full left-0 mt-2 w-72 bg-[var(--color-surface)] border border-[var(--color-surface-lighter)] rounded-2xl shadow-2xl p-4 animate-fade-in max-h-96 overflow-y-auto z-50">
+                                        <div className="grid grid-cols-5 gap-2">
                                             {Array.from({ length: currentBook.chapters }, (_, i) => i + 1).map(c => (
                                                 <button
                                                     key={c}
                                                     onClick={() => handleChapterSelect(c)}
-                                                    className={`p-2 rounded-lg text-sm font-medium hover:bg-[var(--color-surface-light)] transition-colors ${c === currentChapter ? 'bg-[var(--color-primary)] text-[var(--color-background)]' : 'text-[var(--color-text-secondary)]'}`}
+                                                    className={`aspect-square rounded-xl flex items-center justify-center text-sm font-medium transition-all ${c === currentChapter ? 'bg-[var(--color-primary)] text-[#000] shadow-glow' : 'bg-[var(--color-surface-light)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-lighter)] hover:text-[var(--color-text)]'}`}
                                                 >
                                                     {c}
                                                 </button>
@@ -147,80 +143,57 @@ export default function Header() {
                         )}
                     </div>
 
-                    {/* Center/Right: Search Bar - Desktop */}
-                    <div ref={searchRef} className="relative flex-1 max-w-md hidden md:block">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)]" />
+                    {/* Center/Right: Search Bar */}
+                    <div ref={searchRef} className="relative flex-1 max-w-sm hidden md:block">
+                        <div className="relative group">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)] group-focus-within:text-[var(--color-primary)] transition-colors" />
                             <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Buscar versículos..."
-                                className="input pl-10 pr-10 py-2.5 text-sm bg-[var(--color-surface-light)]"
+                                placeholder="Buscar..."
+                                className="input pl-10 pr-10 py-2 text-sm bg-[var(--color-surface-light)] border-transparent focus:bg-[var(--color-surface-lighter)] rounded-full"
                             />
                             {searchQuery && (
                                 <button
                                     onClick={clearSearch}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                                 >
                                     <X className="w-4 h-4" />
                                 </button>
                             )}
                         </div>
-
-                        {/* Search Results Dropdown */}
+                        {/* Search Results Dropdown (Same as before) */}
                         {showResults && (
-                            <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--color-surface)] border border-[var(--color-surface-lighter)] rounded-xl shadow-lg overflow-hidden animate-fade-in">
+                            <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--color-surface)] border border-[var(--color-surface-lighter)] rounded-2xl shadow-2xl overflow-hidden animate-fade-in">
                                 {isSearching ? (
-                                    <div className="p-4 text-center text-[var(--color-text-muted)] text-sm">
-                                        Buscando...
-                                    </div>
+                                    <div className="p-4 text-center text-[var(--color-text-muted)] text-sm">Buscando...</div>
                                 ) : searchResults.length > 0 ? (
                                     <ul className="max-h-80 overflow-y-auto">
                                         {searchResults.map((result, index) => (
                                             <li key={index}>
-                                                <button
-                                                    onClick={() => handleResultClick(result)}
-                                                    className="w-full p-3 text-left hover:bg-[var(--color-surface-light)] transition-colors flex items-start gap-3"
-                                                >
-                                                    <span className="badge badge-primary shrink-0 mt-0.5">
-                                                        {result.book?.abbrev?.pt || result.book?.abbrev} {result.chapter}:{result.number}
+                                                <button onClick={() => handleResultClick(result)} className="w-full p-3 text-left hover:bg-[var(--color-surface-light)] transition-colors flex items-start gap-3 border-b border-[var(--color-surface-lighter)] last:border-0">
+                                                    <span className="text-xs font-bold text-[var(--color-primary)] shrink-0 mt-0.5 uppercase tracking-wide">
+                                                        {result.book?.abbrev?.pt} {result.chapter}:{result.number}
                                                     </span>
-                                                    <span className="text-sm text-[var(--color-text-secondary)] line-clamp-2">
-                                                        {result.text}
-                                                    </span>
+                                                    <span className="text-sm text-[var(--color-text-secondary)] line-clamp-2">{result.text}</span>
                                                 </button>
                                             </li>
                                         ))}
                                     </ul>
                                 ) : (
-                                    <div className="p-4 text-center text-[var(--color-text-muted)] text-sm">
-                                        Nenhum resultado encontrado
-                                    </div>
+                                    <div className="p-4 text-center text-[var(--color-text-muted)] text-sm">Nenhum resultado</div>
                                 )}
                             </div>
                         )}
                     </div>
 
                     {/* Right: Navigation - Desktop */}
-                    <nav className="hidden md:flex items-center gap-1">
-                        <Link
-                            to="/"
-                            className={`btn btn-ghost ${isActive('/') ? 'bg-[var(--color-surface)] text-[var(--color-primary)]' : ''}`}
-                        >
-                            <Home className="w-4 h-4" />
-                            Início
-                        </Link>
-                        <Link
-                            to="/favorites"
-                            className={`btn btn-ghost relative ${isActive('/favorites') ? 'bg-[var(--color-surface)] text-[var(--color-primary)]' : ''}`}
-                        >
-                            <Heart className="w-4 h-4" />
-                            Favoritos
+                    <nav className="hidden md:flex items-center gap-2">
+                        <Link to="/favorites" className="btn btn-ghost btn-icon relative group">
+                            <Heart className="w-5 h-5 text-[var(--color-text-secondary)] group-hover:text-[var(--color-primary)] transition-colors" />
                             {favoritesCount > 0 && (
-                                <span className="absolute -top-1 -right-1 w-5 h-5 bg-[var(--color-primary)] text-[var(--color-background)] text-xs font-bold rounded-full flex items-center justify-center">
-                                    {favoritesCount > 99 ? '99+' : favoritesCount}
-                                </span>
+                                <span className="absolute top-1 right-1 w-2 h-2 bg-[var(--color-primary)] rounded-full"></span>
                             )}
                         </Link>
                     </nav>
@@ -230,77 +203,52 @@ export default function Header() {
                         onClick={() => setShowMobileMenu(!showMobileMenu)}
                         className="btn btn-ghost btn-icon md:hidden"
                     >
-                        <Menu className="w-5 h-5" />
+                        <Menu className="w-6 h-6" />
                     </button>
                 </div>
 
                 {/* Mobile Menu */}
                 {showMobileMenu && (
                     <div className="md:hidden pb-4 animate-fade-in">
-                        {/* Mobile Search */}
-                        <div className="relative mb-3">
+                        <div className="relative mb-4">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)]" />
                             <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Buscar versículos..."
-                                className="input pl-10 pr-10 py-2.5 text-sm"
+                                placeholder="Buscar..."
+                                className="input pl-10 rounded-full bg-[var(--color-surface-light)]"
                             />
-                            {searchQuery && (
-                                <button
-                                    onClick={clearSearch}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
-                                >
-                                    <X className="w-4 h-4" />
-                                </button>
-                            )}
                         </div>
 
-                        {/* Mobile Search Results */}
+                        {/* Mobile Search Results (simplified) */}
                         {showResults && searchResults.length > 0 && (
-                            <ul className="mb-3 bg-[var(--color-surface-light)] rounded-xl overflow-hidden max-h-60 overflow-y-auto">
+                            <ul className="mb-4 bg-[var(--color-surface)] rounded-2xl overflow-hidden shadow-lg max-h-60 overflow-y-auto border border-[var(--color-surface-lighter)]">
                                 {searchResults.map((result, index) => (
                                     <li key={index}>
-                                        <button
-                                            onClick={() => handleResultClick(result)}
-                                            className="w-full p-3 text-left hover:bg-[var(--color-surface-lighter)] transition-colors flex items-center gap-2"
-                                        >
-                                            <span className="badge badge-primary shrink-0">
+                                        <button onClick={() => handleResultClick(result)} className="w-full p-4 text-left hover:bg-[var(--color-surface-light)] border-b border-[var(--color-surface-lighter)] last:border-0">
+                                            <div className="text-xs font-bold text-[var(--color-primary)] mb-1 uppercase tracking-wide">
                                                 {result.book?.abbrev?.pt} {result.chapter}:{result.number}
-                                            </span>
-                                            <ChevronRight className="w-4 h-4 text-[var(--color-text-muted)] ml-auto shrink-0" />
+                                            </div>
+                                            <div className="text-sm text-[var(--color-text-secondary)] line-clamp-2">{result.text}</div>
                                         </button>
                                     </li>
                                 ))}
                             </ul>
                         )}
 
-                        {/* Mobile Nav Links */}
-                        <nav className="flex flex-col gap-1">
-                            <Link
-                                to="/"
-                                onClick={() => setShowMobileMenu(false)}
-                                className={`btn justify-start ${isActive('/') ? 'btn-secondary' : 'btn-ghost'}`}
-                            >
-                                <Home className="w-4 h-4" />
-                                Início
+                        <nav className="flex flex-col gap-2">
+                            <Link to="/" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-3 p-3 rounded-xl ${isActive('/') ? 'bg-[var(--color-surface-light)] text-[var(--color-text)]' : 'text-[var(--color-text-secondary)]'}`}>
+                                <Home className="w-5 h-5" />
+                                <span className="font-medium">Início</span>
                             </Link>
-                            <Link
-                                to="/favorites"
-                                onClick={() => setShowMobileMenu(false)}
-                                className={`btn justify-start relative ${isActive('/favorites') ? 'btn-secondary' : 'btn-ghost'}`}
-                            >
-                                <Heart className="w-4 h-4" />
-                                Meus Favoritos
-                                {favoritesCount > 0 && (
-                                    <span className="ml-auto badge badge-primary">
-                                        {favoritesCount}
-                                    </span>
-                                )}
+                            <Link to="/favorites" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-3 p-3 rounded-xl ${isActive('/favorites') ? 'bg-[var(--color-surface-light)] text-[var(--color-text)]' : 'text-[var(--color-text-secondary)]'}`}>
+                                <Heart className="w-5 h-5" />
+                                <span className="font-medium">Meus Favoritos</span>
+                                {favoritesCount > 0 && <span className="ml-auto text-xs font-bold bg-[var(--color-surface-lighter)] px-2 py-0.5 rounded-full">{favoritesCount}</span>}
                             </Link>
-                            <div className="mt-4 px-3 text-xs text-[var(--color-text-muted)] border-t border-[var(--color-surface-lighter)] pt-4">
-                                Versão 2.1 (Offline Ready)
+                            <div className="mt-4 px-3 text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest text-center opacity-50">
+                                Versão 2.1 • Offline Ready
                             </div>
                         </nav>
                     </div>
